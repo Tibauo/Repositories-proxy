@@ -1,0 +1,13 @@
+FROM debian:latest
+RUN apt update -y \
+  && apt upgrade -y \
+  && apt install -y createrepo nginx debmirror 
+
+RUN mkdir /repos \
+  && mkdir -p /root/.gnupg/
+
+COPY nginx.conf /etc/nginx/conf.d/nginx.conf
+
+ARG IP
+RUN sed -i "s/localhost/$IP/g" /etc/nginx/conf.d/nginx.conf
+CMD ["nginx", "-g", "daemon off;"]

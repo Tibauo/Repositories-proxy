@@ -1,0 +1,11 @@
+FROM debian:latest
+RUN apt update -y \
+  && apt upgrade -y \
+  && apt install -y createrepo debmirror 
+
+RUN mkdir /repos \
+  && mkdir -p /root/.gnupg/
+
+ENTRYPOINT /usr/bin/rsync  -R -av --chown nginx --delete --delete-excluded  --exclude "local*" --exclude "isos" rsync://ftp.pasteur.fr/mirrors/CentOS/7/ /repos/ \
+  && /usr/bin/rsync  -R -av --chown nginx --delete --delete-excluded  --exclude "local*" --exclude "isos" rsync://ftp.pasteur.fr/mirrors/CentOS/8/ /repos/ \
+  && cp /usr/share/keyrings/debian-archive-keyring.gpg ~/.gnupg/trustedkeys.gpg && /usr/bin/debmirror /repos/Debian --nosource --host=ftp2.de.debian.org --root=/debian --dist=jessie,stretch --arch=amd64 --section=main,contrib,non-free,main/debian-installer --i18n --passive --cleanup --verbose
